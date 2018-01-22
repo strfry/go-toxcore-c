@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-clang/v3.9/clang"
+	"github.com/go-clang/v3.8/clang"
 )
 
 func main() {

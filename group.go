@@ -14,7 +14,7 @@ void callbackConferenceTitleWrapperForC(Tox*, uint32_t, uint32_t, uint8_t*, size
 void callbackConferenceNameListChangeWrapperForC(Tox*, uint32_t, uint32_t, TOX_CONFERENCE_STATE_CHANGE, void*);
 
 // fix nouse compile warning
-static inline void fixnousetoxgroup() {
+static inline __attribute__((__unused__)) void fixnousetoxgroup() {
 }
 
 */

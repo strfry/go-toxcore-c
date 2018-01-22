@@ -44,7 +44,7 @@ extern void rgb_to_i420(unsigned char* rgb, vpx_image_t *img);
 
 
 // fix nouse compile warning
-static inline void fixnousetoxav() {
+static inline __attribute__((__unused__)) void fixnousetoxav() {
     cb_call_wrapper_for_go(NULL, NULL, NULL);
     cb_call_state_wrapper_for_go(NULL, NULL, NULL);
     cb_bit_rate_status_wrapper_for_go(NULL, NULL, NULL);

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kitech/go-toxcore"
+	"github.com/TokTok/go-toxcore-c"
 )
 
 func init() {

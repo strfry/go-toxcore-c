@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/kitech/go-toxcore"
+	"github.com/TokTok/go-toxcore-c"
 )
 
 func init() {
@@ -60,13 +60,12 @@ func main() {
 		if err != nil {
 			log.Println(ok, err, len(salt), salt)
 		}
-		pkey := tox.NewToxPassKey()
-		ok, err = pkey.DeriveWithSalt([]byte(pass), salt)
+		pkey, err := tox.DeriveWithSalt([]byte(pass), salt)
+		defer pkey.Free()
 		if err != nil {
-			log.Println(ok, err)
+			log.Println(err)
 		}
 		ok, err, datad := pkey.Decrypt(data)
-		pkey.Free()
 		if err != nil {
 			// log.Println(ok, err, len(datad), datad[0:32])
 			log.Println("Decrypt error, check your -pass:", err)
@@ -105,7 +104,6 @@ func main() {
 	} else { // do encrypt
 		log.Println("Encrypting...")
 
-		pakey := tox.NewToxPassKey()
 		// first time, there is no salt
 		salt := make([]byte, tox.PASS_KEY_LENGTH)
 		_, err, salt := tox.GetSalt(data)
@@ -115,8 +113,9 @@ func main() {
 		}
 		_ = salt
 
-		// _, err = pakey.DeriveWithSalt([]byte(pass), salt)
-		_, err = pakey.Derive([]byte(pass))
+		// pakey, err = tox.DeriveWithSalt([]byte(pass), salt)
+		pakey, err := tox.Derive([]byte(pass))
+		defer pakey.Free()
 		if err != nil {
 			log.Println(err)
 			return

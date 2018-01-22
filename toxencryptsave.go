@@ -12,39 +12,35 @@ type ToxPassKey struct {
 	cpk *C.Tox_Pass_Key
 }
 
-func NewToxPassKey() *ToxPassKey {
-	this := &ToxPassKey{}
-	this.cpk = C.tox_pass_key_new()
-	return this
-}
-
 func (this *ToxPassKey) Free() {
 	C.tox_pass_key_free(this.cpk)
 }
 
-func (this *ToxPassKey) Derive(passphrase []byte) (bool, error) {
+func Derive(passphrase []byte) (*ToxPassKey, error) {
+	this := &ToxPassKey{}
+
 	passphrase_ := (*C.uint8_t)(&passphrase[0])
 
 	var cerr C.TOX_ERR_KEY_DERIVATION
-	ok := C.tox_pass_key_derive(this.cpk, passphrase_, C.size_t(len(passphrase)), &cerr)
-	var err error
-	if !bool(ok) {
-		err = toxerr(cerr)
+	this.cpk = C.tox_pass_key_derive(passphrase_, C.size_t(len(passphrase)), &cerr)
+	if cerr != C.TOX_ERR_KEY_DERIVATION_OK {
+		return nil, toxerr(cerr)
 	}
-	return bool(ok), err
+	return this, nil
 }
 
-func (this *ToxPassKey) DeriveWithSalt(passphrase []byte, salt []byte) (bool, error) {
+func DeriveWithSalt(passphrase []byte, salt []byte) (*ToxPassKey, error) {
+	this := &ToxPassKey{}
+
 	passphrase_ := (*C.uint8_t)(&passphrase[0])
 	salt_ := (*C.uint8_t)(&salt[0])
 
 	var cerr C.TOX_ERR_KEY_DERIVATION
-	ok := C.tox_pass_key_derive_with_salt(this.cpk, passphrase_, C.size_t(len(passphrase)), salt_, &cerr)
-	var err error
-	if !bool(ok) {
-		err = toxerr(cerr)
+	this.cpk = C.tox_pass_key_derive_with_salt(passphrase_, C.size_t(len(passphrase)), salt_, &cerr)
+	if cerr != C.TOX_ERR_KEY_DERIVATION_OK {
+		return nil, toxerr(cerr)
 	}
-	return bool(ok), err
+	return this, nil
 }
 
 func (this *ToxPassKey) Encrypt(plaintext []byte) (bool, error, []byte) {

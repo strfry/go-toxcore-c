@@ -1,71 +1,44 @@
 language: go
+compiler: clang
+sudo: required
+
+addons:
+  apt:
+    sources:
+    - sourceline: 'ppa:chris-lea/libsodium'
+    packages:
+    - libclang-dev
+    - libopus-dev
+    - libsodium-dev
+    - libvpx-dev
 
 go:
-  - "1.4"
-  - "1.5"
-  - "1.6"
-  - "1.7"
-
-compiler:
-  - gcc
-  - clang
+#- 1.4.x
+#- 1.5.x
+#- 1.6.x
+#- 1.7.x
+#- 1.8.x
+#- 1.9.x
+- master
 
 install:
-  - sudo apt-get update
-  # installing libsodium, needed for toxcore
-  - git clone https://github.com/jedisct1/libsodium.git
-  - cd libsodium
-  - git checkout tags/1.0.3
-  - ./autogen.sh
-  - ./configure --prefix=/usr
-  - make -j3 > /dev/null
-  - sudo make install > /dev/null
-  - cd ..
-  # installing libopus, needed for audio encoding/decoding
-  - wget http://downloads.xiph.org/releases/opus/opus-1.1.tar.gz > /dev/null
-  - tar xzf opus-1.1.tar.gz > /dev/null
-  - cd opus-1.1
-  - ./configure
-  - make -j3 > /dev/null
-  - sudo make install > /dev/null
-  - cd ..
-  # installing vpx
-  - sudo apt-get install yasm
-  - git clone https://chromium.googlesource.com/webm/libvpx > /dev/null
-  - cd libvpx
-  - ./configure --enable-shared > /dev/null
-  - make -j3 >/dev/null
-  - sudo make install > /dev/null
-  - cd ..
-  # creating librarys' links and updating cache
-  - sudo ldconfig
-  - git clone https://github.com/irungentoo/toxcore.git toxcore
-  - cd toxcore
-  - autoreconf -i
-  - ./configure --prefix=/usr --disable-tests --disable-ntox
-  - make -j2
-  - sudo make install
-  - cd ..
-  - sudo ldconfig > /dev/null
-  - apt-cache search tox
-  - apt-cache search opus
-  - apt-cache search libvpx
-
-script:
-  - pwd
-  - go get github.com/streamrail/concurrent-map
-  # - go get -v -x github.com/kitech/go-toxcore
-  # - go get -v -x github.com/kitech/go-toxcore/examples
-  - go install -v -x
-  - go build -v -x -o echobot ./examples/toxecho.go
-  - go test -v -covermode count -timeout 60m
-
-
-notifications:
-  email: false
-
-#  irc:
-#    channels:
-#      - "chat.freenode.net#tox-dev"
-#    on_success: always
-#    on_failure: always
+# Add libclang's lib directory to search path for Go.
+- export CGO_LDFLAGS="-L`llvm-config --libdir`"
+# Install toxcore.
+- git clone https://github.com/TokTok/c-toxcore
+- cd c-toxcore
+- cmake .
+- make -j2
+- sudo make install
+- cd ..
+- sudo ldconfig > /dev/null
+# Install Go packages.
+- go get github.com/bitly/go-simplejson
+- go get github.com/go-clang/v3.8/clang
+- go get github.com/kitech/godsts/maps/hashbidimap
+- go get github.com/kitech/godsts/maps/hashmap
+- go get github.com/kitech/godsts/sets/hashset
+- go get github.com/masatana/go-textdistance
+- go get github.com/sasha-s/go-deadlock
+- go get github.com/sysr-q/gopp/gopp
+- go get github.com/xrash/smetrics

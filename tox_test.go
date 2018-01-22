@@ -46,7 +46,7 @@ func TestCreate(t *testing.T) {
 	})
 	t.Run("tcp options", func(t *testing.T) {
 		opts := NewToxOptions()
-		opts.Tcp_port = 34567
+		opts.Tcp_port = 44577
 		_t := NewTox(opts)
 		if _t == nil {
 			t.Error("nil")
@@ -55,7 +55,7 @@ func TestCreate(t *testing.T) {
 	})
 	t.Run("tcp conflict", func(t *testing.T) {
 		opts := NewToxOptions()
-		opts.Tcp_port = 34567
+		opts.Tcp_port = 44587
 		_t, _t2 := NewTox(opts), NewTox(opts)
 		if _t == nil || _t2 != nil {
 			t.Error("should non-nil/nil", _t, _t2)
@@ -740,6 +740,9 @@ func TestGroup(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		if err != nil {
+			t.Error(err)
+		}
 		waitcond(func() bool {
 			return t1.t.CountChatList() == 1
 		}, 100)
@@ -749,6 +752,9 @@ func TestGroup(t *testing.T) {
 		if t2.t.CountChatList() != 1 {
 			t.Error("must 1 chat", t2.t.CountChatList())
 		}
+		waitcond(func() bool {
+			return t1.t.GroupNumberPeers(gn) > 0
+		}, 100)
 
 		if _, err := t1.t.DelGroupChat(gn); err != nil {
 			t.Error(err)
@@ -784,6 +790,10 @@ func TestGroup(t *testing.T) {
 		recved_act := ""
 		recved_msg := ""
 		t1.t.CallbackGroupMessage(func(_ *Tox, groupNumber, peerNumber int, msg string, ud interface{}) {
+			recved_msg = msg
+		}, nil)
+		t1.t.CallbackGroupAction(func(_ *Tox, groupNumber, peerNumber int, msg string, ud interface{}) {
+			recved_act = msg
 		}, nil)
 
 		go t1.Iterate()
@@ -832,7 +842,8 @@ func TestGroup(t *testing.T) {
 			return len(recved_msg) > 0 && len(recved_act) > 0
 		}, 10)
 		if recved_msg != "foo123" || recved_act != "bar123" {
-			t.Error(recved_msg, recved_act)
+			t.Errorf("Received msg='%s', act='%s', but wanted '%s' and '%s'",
+				recved_msg, recved_act, "foo123", "bar123")
 		}
 	})
 }

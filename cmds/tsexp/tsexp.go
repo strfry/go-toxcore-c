@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/kitech/go-toxcore"
+	"github.com/TokTok/go-toxcore-c"
 )
 
 func init() {
@@ -47,13 +47,12 @@ func main() {
 		if err != nil {
 			log.Println(ok, err, len(salt), salt)
 		}
-		pkey := tox.NewToxPassKey()
-		ok, err = pkey.DeriveWithSalt([]byte(pass), salt)
+		pkey, err := tox.DeriveWithSalt([]byte(pass), salt)
+		defer pkey.Free()
 		if err != nil {
-			log.Println(ok, err)
+			log.Println(err)
 		}
 		ok, err, datad := pkey.Decrypt(data)
-		pkey.Free()
 		if err != nil {
 			// log.Println(ok, err, len(datad), datad[0:32])
 			log.Println("Decrypt error, check your -pass:", err)
