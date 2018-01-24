@@ -75,7 +75,6 @@ type cb_file_chunk_request_ftype func(this *Tox, friend_number uint32, file_numb
 
 type Tox struct {
 	opts       *ToxOptions
-	toxopts    *C.struct_Tox_Options
 	toxcore    *C.Tox // save C.Tox
 	threadSafe bool
 	mu         deadlock.RWMutex
@@ -472,10 +471,11 @@ func NewTox(opt *ToxOptions) *Tox {
 	} else {
 		tox.opts = NewToxOptions()
 	}
-	tox.toxopts = tox.opts.toCToxOptions()
+	toxopts := tox.opts.toCToxOptions()
+	defer C.tox_options_free(toxopts)
 
 	var cerr C.TOX_ERR_NEW
-	var toxcore = C.tox_new(tox.toxopts, &cerr)
+	var toxcore = C.tox_new(toxopts, &cerr)
 	tox.toxcore = toxcore
 	if toxcore == nil {
 		log.Println(toxerr(cerr))

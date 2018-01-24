@@ -49,50 +49,47 @@ type ToxOptions struct {
 }
 
 func NewToxOptions() *ToxOptions {
-	toxopts := new(C.struct_Tox_Options)
-	C.tox_options_default(toxopts)
+	toxopts := C.tox_options_new(nil)
+	defer C.tox_options_free(toxopts)
 
 	opts := new(ToxOptions)
-	opts.Ipv6_enabled = bool(toxopts.ipv6_enabled)
-	opts.Udp_enabled = bool(toxopts.udp_enabled)
-	opts.Proxy_type = int32(toxopts.proxy_type)
-	opts.Proxy_port = uint16(toxopts.proxy_port)
-	opts.Tcp_port = uint16(toxopts.tcp_port)
-	opts.Local_discovery_enabled = bool(toxopts.local_discovery_enabled)
-	opts.Start_port = uint16(toxopts.start_port)
-	opts.End_port = uint16(toxopts.end_port)
-	opts.Hole_punching_enabled = bool(toxopts.hole_punching_enabled)
+	opts.Ipv6_enabled = bool(C.tox_options_get_ipv6_enabled(toxopts))
+	opts.Udp_enabled = bool(C.tox_options_get_udp_enabled(toxopts))
+	opts.Proxy_type = int32(C.tox_options_get_proxy_type(toxopts))
+	opts.Proxy_port = uint16(C.tox_options_get_proxy_port(toxopts))
+	opts.Tcp_port = uint16(C.tox_options_get_tcp_port(toxopts))
+	opts.Local_discovery_enabled = bool(C.tox_options_get_local_discovery_enabled(toxopts))
+	opts.Start_port = uint16(C.tox_options_get_start_port(toxopts))
+	opts.End_port = uint16(C.tox_options_get_end_port(toxopts))
+	opts.Hole_punching_enabled = bool(C.tox_options_get_hole_punching_enabled(toxopts))
 
 	return opts
 }
 
 func (this *ToxOptions) toCToxOptions() *C.struct_Tox_Options {
-	toxopts := new(C.struct_Tox_Options)
+	toxopts := C.tox_options_new(nil)
 	C.tox_options_default(toxopts)
-	toxopts.ipv6_enabled = (C._Bool)(this.Ipv6_enabled)
-	toxopts.udp_enabled = (C._Bool)(this.Udp_enabled)
+	C.tox_options_set_ipv6_enabled(toxopts, (C._Bool)(this.Ipv6_enabled))
+	C.tox_options_set_udp_enabled(toxopts, (C._Bool)(this.Udp_enabled))
 
 	if this.Savedata_data != nil {
-		toxopts.savedata_data = (*C.uint8_t)(C.malloc(C.size_t(len(this.Savedata_data))))
-		C.memcpy(unsafe.Pointer(toxopts.savedata_data),
-			unsafe.Pointer(&this.Savedata_data[0]), C.size_t(len(this.Savedata_data)))
-		toxopts.savedata_length = C.size_t(len(this.Savedata_data))
-		toxopts.savedata_type = C.TOX_SAVEDATA_TYPE(this.Savedata_type)
+		C.tox_options_set_savedata_data(toxopts, (*C.uint8_t)(&this.Savedata_data[0]), C.size_t(len(this.Savedata_data)))
+		C.tox_options_set_savedata_type(toxopts, C.TOX_SAVEDATA_TYPE(this.Savedata_type))
 	}
-	toxopts.tcp_port = (C.uint16_t)(this.Tcp_port)
+	C.tox_options_set_tcp_port(toxopts, (C.uint16_t)(this.Tcp_port))
 
-	toxopts.proxy_type = C.TOX_PROXY_TYPE(this.Proxy_type)
-	toxopts.proxy_port = C.uint16_t(this.Proxy_port)
+	C.tox_options_set_proxy_type(toxopts, C.TOX_PROXY_TYPE(this.Proxy_type))
+	C.tox_options_set_proxy_port(toxopts, C.uint16_t(this.Proxy_port))
 	if len(this.Proxy_host) > 0 {
-		toxopts.proxy_host = C.CString(this.Proxy_host)
+		C.tox_options_set_proxy_host(toxopts, C.CString(this.Proxy_host))
 	}
 
-	toxopts.local_discovery_enabled = C._Bool(this.Local_discovery_enabled)
-	toxopts.start_port = C.uint16_t(this.Start_port)
-	toxopts.end_port = C.uint16_t(this.End_port)
-	toxopts.hole_punching_enabled = C._Bool(this.Hole_punching_enabled)
+	C.tox_options_set_local_discovery_enabled(toxopts, C._Bool(this.Local_discovery_enabled))
+	C.tox_options_set_start_port(toxopts, C.uint16_t(this.Start_port))
+	C.tox_options_set_end_port(toxopts, C.uint16_t(this.End_port))
+	C.tox_options_set_hole_punching_enabled(toxopts, C._Bool(this.Hole_punching_enabled))
 
-	toxopts.log_callback = (*C.tox_log_cb)((unsafe.Pointer)(C.toxCallbackLog))
+	C.tox_options_set_log_callback(toxopts, (*C.tox_log_cb)((unsafe.Pointer)(C.toxCallbackLog)))
 
 	return toxopts
 }
