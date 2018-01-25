@@ -21,6 +21,9 @@ go:
 #- 1.9.x
 - master
 
+before_install:
+- go get github.com/mattn/goveralls
+
 install:
 # Add libclang's lib directory to search path for Go.
 - export CGO_LDFLAGS="-L`llvm-config --libdir`"
@@ -42,3 +45,6 @@ install:
 - go get github.com/sasha-s/go-deadlock
 - go get github.com/sysr-q/gopp/gopp
 - go get github.com/xrash/smetrics
+
+script:
+- $GOPATH/bin/goveralls -service=travis-ci
