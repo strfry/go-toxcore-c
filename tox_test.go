@@ -623,8 +623,8 @@ func TestGroup(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if uint8(gtype) != GROUPCHAT_TYPE_TEXT {
-				t.Error(gtype, GROUPCHAT_TYPE_TEXT)
+			if uint8(gtype) != CONFERENCE_TYPE_TEXT {
+				t.Error(gtype, CONFERENCE_TYPE_TEXT)
 			}
 			if t1.t.GroupNumberPeers(gn) != 1 {
 				t.Error(1)
@@ -693,14 +693,14 @@ func TestGroup(t *testing.T) {
 			t1.t.FriendAddNorequest(friendId)
 		}, nil)
 
-		t1.t.CallbackGroupInvite(func(_ *Tox, friendNumber uint32, itype uint8, data string, ud interface{}) {
+		t1.t.CallbackConferenceInvite(func(_ *Tox, friendNumber uint32, itype uint8, data string, ud interface{}) {
 			switch itype {
-			case GROUPCHAT_TYPE_TEXT:
+			case CONFERENCE_TYPE_TEXT:
 				_, err := t1.t.JoinGroupChat(friendNumber, data)
 				if err != nil {
 					t.Error(err)
 				}
-			case GROUPCHAT_TYPE_AV:
+			case CONFERENCE_TYPE_AV:
 				_, err := t1.t.JoinAVGroupChat(friendNumber, data)
 				if err != nil {
 					t.Error(err)
@@ -778,11 +778,11 @@ func TestGroup(t *testing.T) {
 			t1.t.FriendAddNorequest(friendId)
 		}, nil)
 
-		t1.t.CallbackGroupInvite(func(_ *Tox, friendNumber uint32, itype uint8, data string, ud interface{}) {
+		t1.t.CallbackConferenceInvite(func(_ *Tox, friendNumber uint32, itype uint8, data string, ud interface{}) {
 			switch itype {
-			case GROUPCHAT_TYPE_TEXT:
+			case CONFERENCE_TYPE_TEXT:
 				t1.t.JoinGroupChat(friendNumber, data)
-			case GROUPCHAT_TYPE_AV:
+			case CONFERENCE_TYPE_AV:
 				t1.t.JoinAVGroupChat(friendNumber, data)
 			}
 		}, nil)
