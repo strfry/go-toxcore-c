@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-clang/v3.8/clang"
+	"github.com/go-clang/v3.4/clang"
 )
 
 func main() {
@@ -22,9 +22,8 @@ func main() {
 	_ = tuArgs
 	cmdArgs := []string{
 		"-std=c99",
-		"-I/usr/include/",
-		"-I/usr/lib/gcc/x86_64-pc-linux-gnu/7.2.0/include"}
-	tu := idx.ParseTranslationUnit("/usr/include/tox/tox.h", cmdArgs, nil, 0)
+		"-I/usr/lib/clang/3.4/include"}
+	tu := idx.ParseTranslationUnit("/usr/local/include/tox/tox.h", cmdArgs, nil, 0)
 	defer tu.Dispose()
 
 	for _, d := range tu.Diagnostics() {
