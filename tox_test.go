@@ -633,7 +633,7 @@ func TestGroup(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if len(pname) != len("Tox User") {
+			if len(pname) != 0 {
 				t.Error(pname)
 			}
 			pubkey, err := t1.t.GroupPeerPubkey(gn, 0)
