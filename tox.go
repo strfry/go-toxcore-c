@@ -729,6 +729,9 @@ func (this *Tox) FriendExists(friendNumber uint32) bool {
 }
 
 func (this *Tox) FriendSendMessage(friendNumber uint32, message string) (uint32, error) {
+	if len(message) == 0 {
+		return 0, nil
+	}
 	this.lock()
 	defer this.unlock()
 

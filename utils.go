@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"unsafe"
 )
@@ -43,6 +44,8 @@ func FileExist(fname string) bool {
 	return true
 }
 
+// the go-toxcore-c has data lost problem
+// we need first write tmp file, and if ok, then mv to real file
 func (this *Tox) WriteSavedata(fname string) error {
 	if !FileExist(fname) {
 		err := ioutil.WriteFile(fname, this.GetSavedata(), 0755)
@@ -56,8 +59,21 @@ func (this *Tox) WriteSavedata(fname string) error {
 		}
 		liveData := this.GetSavedata()
 		if bytes.Compare(data, liveData) != 0 {
-			err := ioutil.WriteFile(fname, this.GetSavedata(), 0755)
+			tfp, err := ioutil.TempFile(filepath.Dir(fname), "gotcb")
 			if err != nil {
+				return err
+			}
+			if _, err := tfp.Write(liveData); err != nil {
+				return err
+			}
+			tfname := tfp.Name()
+			if err := tfp.Close(); err != nil {
+				return err
+			}
+			if err := os.Remove(fname); err != nil {
+				return err
+			}
+			if err := os.Rename(filepath.Dir(fname)+"/"+tfname, fname); err != nil {
 				return err
 			}
 		}
