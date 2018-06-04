@@ -69,13 +69,13 @@ func callbackConferenceMessageWrapperForC(m *C.Tox, a0 C.uint32_t, a1 C.uint32_t
 	if int(mtype) == MESSAGE_TYPE_NORMAL {
 		for cbfni, ud := range this.cb_conference_messages {
 			cbfn := *(*cb_conference_message_ftype)(cbfni)
-			message := C.GoStringN((*C.char)((*C.int8_t)(a2)), C.int(a3))
+			message := C.GoStringN((*C.char)(unsafe.Pointer(a2)), C.int(a3))
 			this.putcbevts(func() { cbfn(this, uint32(a0), uint32(a1), message, ud) })
 		}
 	} else {
 		for cbfni, ud := range this.cb_conference_actions {
 			cbfn := *(*cb_conference_action_ftype)(cbfni)
-			message := C.GoStringN((*C.char)((*C.int8_t)(a2)), C.int(a3))
+			message := C.GoStringN((*C.char)(unsafe.Pointer(a2)), C.int(a3))
 			this.putcbevts(func() { cbfn(this, uint32(a0), uint32(a1), message, ud) })
 		}
 	}
