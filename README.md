@@ -7,12 +7,14 @@ The golang bindings for libtoxcore
 
 ### Installation
 
-    go get github.com/kitech/go-toxcore
+    # fetch libtoxcore if necessary
+    # see https://github.com/TokTok/c-toxcore/blob/master/INSTALL.md
+    go get github.com/TokTok/go-toxcore-c
 
 
 ### Examples
 
-    import "github.com/kitech/go-toxcore"
+    import "github.com/TokTok/go-toxcore-c"
 
     // use custom options
     opt := tox.NewToxOptions()
