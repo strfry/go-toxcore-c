@@ -41,7 +41,7 @@ func init(){_ERR_BOOTSTRAPS[ERR_BOOTSTRAP_OK] = "TE00: The function returned suc
 const ERR_BOOTSTRAP_NULL = int(C.TOX_ERR_BOOTSTRAP_NULL) // 1
 func init(){_ERR_BOOTSTRAPS[ERR_BOOTSTRAP_NULL] = "TE01: One of the arguments to the function was NULL when it was not expected."}
 const ERR_BOOTSTRAP_BAD_HOST = int(C.TOX_ERR_BOOTSTRAP_BAD_HOST) // 2
-func init(){_ERR_BOOTSTRAPS[ERR_BOOTSTRAP_BAD_HOST] = "TE02: The address could not be resolved to an IP address, or the IP address passed was invalid."}
+func init(){_ERR_BOOTSTRAPS[ERR_BOOTSTRAP_BAD_HOST] = "TE02: The hostname could not be resolved to an IP address, or the IP address passed was invalid."}
 const ERR_BOOTSTRAP_BAD_PORT = int(C.TOX_ERR_BOOTSTRAP_BAD_PORT) // 3
 func init(){_ERR_BOOTSTRAPS[ERR_BOOTSTRAP_BAD_PORT] = "TE03: The port passed was invalid. The valid port range is (1, 65535)."}
 
@@ -302,6 +302,15 @@ const ERR_CONFERENCE_GET_TYPE_OK = int(C.TOX_ERR_CONFERENCE_GET_TYPE_OK) // 0
 func init(){_ERR_CONFERENCE_GET_TYPES[ERR_CONFERENCE_GET_TYPE_OK] = "TE00: The function returned successfully."}
 const ERR_CONFERENCE_GET_TYPE_CONFERENCE_NOT_FOUND = int(C.TOX_ERR_CONFERENCE_GET_TYPE_CONFERENCE_NOT_FOUND) // 1
 func init(){_ERR_CONFERENCE_GET_TYPES[ERR_CONFERENCE_GET_TYPE_CONFERENCE_NOT_FOUND] = "TE01: The conference number passed did not designate a valid conference."}
+
+var _ERR_CONFERENCE_BY_UIDS = make(map[int]string)
+func init(){_ERR_CONFERENCE_BY_UIDS[-1] = "TE-1: _ERR_CONFERENCE_BY_UID"}
+const ERR_CONFERENCE_BY_UID_OK = int(C.TOX_ERR_CONFERENCE_BY_UID_OK) // 0
+func init(){_ERR_CONFERENCE_BY_UIDS[ERR_CONFERENCE_BY_UID_OK] = "TE00: The function returned successfully."}
+const ERR_CONFERENCE_BY_UID_NULL = int(C.TOX_ERR_CONFERENCE_BY_UID_NULL) // 1
+func init(){_ERR_CONFERENCE_BY_UIDS[ERR_CONFERENCE_BY_UID_NULL] = "TE01: One of the arguments to the function was NULL when it was not expected."}
+const ERR_CONFERENCE_BY_UID_NOT_FOUND = int(C.TOX_ERR_CONFERENCE_BY_UID_NOT_FOUND) // 2
+func init(){_ERR_CONFERENCE_BY_UIDS[ERR_CONFERENCE_BY_UID_NOT_FOUND] = "TE02: No conference with the given uid exists on the conference list."}
 
 var _ERR_FRIEND_CUSTOM_PACKETS = make(map[int]string)
 func init(){_ERR_FRIEND_CUSTOM_PACKETS[-1] = "TE-1: _ERR_FRIEND_CUSTOM_PACKET"}
