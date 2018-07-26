@@ -36,7 +36,7 @@ type cb_audio_bit_rate_ftype func(this *ToxAV, friendNumber uint32, audioBitRate
 type cb_video_bit_rate_ftype func(this *ToxAV, friendNumber uint32, videoBitRate uint32, userData interface{})
 type cb_audio_receive_frame_ftype func(this *ToxAV, friendNumber uint32, pcm []byte, sampleCount int, channels int, samplingRate int, userData interface{})
 type cb_video_receive_frame_ftype func(this *ToxAV, friendNumber uint32, width uint16, height uint16, data []byte, userData interface{})
-type cb_audio_ftype func(this *Tox, groupNumber uint32, peerNumber uint32, pcm []int16, samples uint, channels uint8, sample_rate uint32, userData interface{})
+type cb_audio_ftype func(this *Tox, groupNumber uint32, peerNumber uint32, pcm []byte, samples uint, channels uint8, sample_rate uint32, userData interface{})
 
 type ToxAV struct {
 	tox   *Tox
@@ -304,20 +304,22 @@ func (this *ToxAV) CallbackVideoReceiveFrame(cbfn cb_video_receive_frame_ftype, 
 //export callbackAudioForC
 func callbackAudioForC(m *C.Tox, groupnumber C.uint32_t, peernumber C.uint32_t, pcm *C.int16_t, samples C.uint, channels C.uint8_t, sample_rate C.uint32_t, userdata unsafe.Pointer) {
 	var this = cbUserDatas.get(m)
-	if _cbfnx, ok := this.cb_audios[uint32(groupnumber)]; ok {
+
+	if _cbfnx, ok := this.cb_audios[uint32(groupnumber)]; ok && _cbfnx != nil {
 		_cbfn := (_cbfnx).(cb_audio_ftype)
 		this.putcbevts(func() {
-			blen := C.size_t(samples) * C.size_t(channels) * 2
-			pcm_ := C.GoBytes(unsafe.Pointer(pcm), C.int(blen)) // TODO copy memory improve
-			pcm16_ := *((*[]int16)(unsafe.Pointer(&pcm_[0])))
-			_cbfn(this, uint32(groupnumber), uint32(peernumber), pcm16_, uint(samples), uint8(channels), uint32(sample_rate), nil)
+			blen := C.int(samples) * C.int(channels) * 2
+			pcm_ := C.GoBytes(unsafe.Pointer(pcm), blen) // TODO copy memory improve
+			_cbfn(this, uint32(groupnumber), uint32(peernumber), pcm_, uint(samples), uint8(channels), uint32(sample_rate), nil)
 		})
 	}
 }
 
 func (this *Tox) AddAVGroupChat(cbfn cb_audio_ftype) uint32 {
 	r := C.toxav_add_av_groupchat(this.toxcore, (*[0]byte)(unsafe.Pointer(C.callbackAudioForC)), nil)
-	this.cb_audios[uint32(r)] = cbfn
+	if cbfn != nil {
+		this.cb_audios[uint32(r)] = cbfn
+	}
 	return uint32(r)
 }
 
@@ -326,18 +328,20 @@ func (this *Tox) JoinAVGroupChat(friendNumber uint32, cookie string, cbfn cb_aud
 	if err != nil {
 		return 0, errors.New("Invalid cookie:" + cookie)
 	}
+
 	var _fn = C.uint32_t(friendNumber)
 	var _data = (*C.uint8_t)((unsafe.Pointer)(&data[0]))
 	var length = len(data)
 	var _length = C.uint16_t(length)
 
-	// TODO nil => real
 	r := C.toxav_join_av_groupchat(this.toxcore, _fn, _data, _length,
 		(*[0]byte)(unsafe.Pointer(C.callbackAudioForC)), nil)
 	if int(r) == -1 {
 		return uint32(r), errors.New("Join av group chat failed")
 	}
-	this.cb_audios[uint32(r)] = cbfn
+	if cbfn != nil {
+		this.cb_audios[uint32(r)] = cbfn
+	}
 
 	if this.hooks.ConferenceJoin != nil {
 		this.hooks.ConferenceJoin(friendNumber, uint32(r), cookie)

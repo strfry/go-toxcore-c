@@ -39,7 +39,7 @@ func TestIssue6(t *testing.T) {
 	waitcond(func() bool { return _t2.IsConnected() > 0 }, 100)
 	log.Println("both connected")
 
-	gid := _t1.AddAVGroupChat()
+	gid := _t1.AddAVGroupChat(nil)
 	// ok, err := _t1.DelGroupChat(gid)
 	// log.Println(ok, err)
 	log.Println(gid)

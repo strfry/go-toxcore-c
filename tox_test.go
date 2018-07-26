@@ -702,7 +702,7 @@ func TestGroup(t *testing.T) {
 					t.Error(err)
 				}
 			case CONFERENCE_TYPE_AV:
-				_, err := t1.t.JoinAVGroupChat(friendNumber, data)
+				_, err := t1.t.JoinAVGroupChat(friendNumber, data, nil)
 				if err != nil {
 					t.Error(err)
 				}
@@ -784,7 +784,7 @@ func TestGroup(t *testing.T) {
 			case CONFERENCE_TYPE_TEXT:
 				t1.t.JoinGroupChat(friendNumber, data)
 			case CONFERENCE_TYPE_AV:
-				t1.t.JoinAVGroupChat(friendNumber, data)
+				t1.t.JoinAVGroupChat(friendNumber, data, nil)
 			}
 		}, nil)
 
