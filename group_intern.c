@@ -232,7 +232,7 @@ static Group_c_Fake *get_group_c(Tox *tox, int groupnumber)
     // int fos2 = offsetof(Group_c_Fake, identifier);
     int conferences_object_offset = fos;
 
-    char **p = (char**)(&((char*)tox)[0] + conferences_object_offset);
+    char **p = (char**)(&((char*)*(struct Messenger **)tox)[0] + conferences_object_offset);
     // void *p2 = ((struct Messenger*)tox)->conferences_object;
     Group_Chats* grpchats = (Group_Chats*)(*p);
     if (groupnumber_not_valid(grpchats, groupnumber)) {
