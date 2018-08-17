@@ -129,6 +129,7 @@ typedef enum {
 
 struct Messenger {
     /*Logger*/ void *log;
+    /*Mono_Time*/ void *mono_time;
 
     /*Networking_Core*/void *net;
     /*Net_Crypto*/void *net_crypto;
