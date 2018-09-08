@@ -15,7 +15,7 @@ void callbackConferencePeerNameWrapperForC(Tox*, uint32_t, uint32_t, uint8_t*, s
 void callbackConferencePeerListChangedWrapperForC(Tox*, uint32_t, void*);
 
 // fix nouse compile warning
-static inline __attribute__((__unused__)) void fixnousetoxgroup() {
+static inline __attribute__((__unused__)) void fixnousetoxgroup(void) {
 }
 
 */

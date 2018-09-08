@@ -28,7 +28,7 @@ void callbackFileChunkRequestWrapperForC(Tox *tox, uint32_t friend_number, uint3
                                        size_t length, void *user_data);
 
 // fix nouse compile warning
-static inline __attribute__((__unused__)) void fixnousetox() {
+static inline __attribute__((__unused__)) void fixnousetox(void) {
 }
 
 */
