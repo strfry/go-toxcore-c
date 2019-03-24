@@ -18,11 +18,14 @@ import (
 // `go test -v -run Covers` will show untested functions
 // TODO boundary value testing
 
-var bsnodes = []string{
-	"tox.ngc.zone", "33445", "15E9C309CFCB79FDDF0EBA057DABB49FE15F3803B1BFF06536AE2E5BA5E4690E",
-	"node.tox.biribiri.org", "33445", "F404ABAA1C99A9D37D61AB54898F56793E1DEF8BD46B1038B9D822E8460FAB67",
-	"178.62.250.138", "33445", "788236D34978D1D5BD822F0A5BEBD2C53C64CC31CD3149350EE27D4D9A2F9B6B",
-	"198.98.51.198", "33445", "1D5A5F2F5D6233058BF0259B09622FB40B482E4FA0931EB8FD3AB8E7BF7DAF6F",
+var bsnodes = []struct {
+	host string
+	port string
+	key  string
+}{
+	{"node.tox.biribiri.org", "33445", "F404ABAA1C99A9D37D61AB54898F56793E1DEF8BD46B1038B9D822E8460FAB67"},
+	{"178.62.250.138", "33445", "788236D34978D1D5BD822F0A5BEBD2C53C64CC31CD3149350EE27D4D9A2F9B6B"},
+	{"198.98.51.198", "33445", "1D5A5F2F5D6233058BF0259B09622FB40B482E4FA0931EB8FD3AB8E7BF7DAF6F"},
 }
 
 func init() {
@@ -210,30 +213,31 @@ func TestBase(t *testing.T) {
 }
 
 func TestBootstrap(t *testing.T) {
+	bsnode := bsnodes[0]
 	_t := NewTox(nil)
 	defer _t.Kill()
-	port, _ := strconv.Atoi(bsnodes[1])
+	port, _ := strconv.Atoi(bsnode.port)
 
 	t.Run("success", func(t *testing.T) {
-		if ok, err := _t.Bootstrap(bsnodes[0], uint16(port), bsnodes[2]); !ok || err != nil {
+		if ok, err := _t.Bootstrap(bsnode.host, uint16(port), bsnode.key); !ok || err != nil {
 			t.Error("must ok", ok, err)
 		}
 	})
 	t.Run("failed", func(t *testing.T) {
-		brkey := bsnodes[2]
-		brkey = "XYZAB" + bsnodes[2][3:]
-		if ok, err := _t.Bootstrap(bsnodes[0], uint16(port), brkey); ok || err == nil {
+		brkey := bsnode.key
+		brkey = "XYZAB" + bsnode.key[3:]
+		if ok, err := _t.Bootstrap(bsnode.host, uint16(port), brkey); ok || err == nil {
 			t.Error("must failed", ok, err)
 		}
-		if ok, err := _t.Bootstrap("a.b.c.d", uint16(port), bsnodes[2]); ok || err == nil {
+		if ok, err := _t.Bootstrap("a.b.c.d", uint16(port), bsnode.key); ok || err == nil {
 			t.Error("must failed", ok, err)
 		}
 	})
 	t.Run("relay", func(t *testing.T) {
-		if ok, err := _t.AddTcpRelay(bsnodes[0], uint16(port), bsnodes[2]); !ok || err != nil {
+		if ok, err := _t.AddTcpRelay(bsnode.host, uint16(port), bsnode.key); !ok || err != nil {
 			t.Error("must ok", ok, err)
 		}
-		if ok, err := _t.AddTcpRelay("a.b.c.d", uint16(port), bsnodes[2]); ok || err == nil {
+		if ok, err := _t.AddTcpRelay("a.b.c.d", uint16(port), bsnode.key); ok || err == nil {
 			t.Error("must failed", ok, err)
 		}
 	})
@@ -267,11 +271,12 @@ func (minitox *MiniTox) Iterate() {
 
 func (minitox *MiniTox) bootstrap() {
 	for idx := 0; idx < len(bsnodes)/3; idx++ {
-		port, err := strconv.Atoi(bsnodes[1+idx*3])
-		_, err = minitox.t.Bootstrap(bsnodes[0+idx*3], uint16(port), bsnodes[2+idx*3])
+		bsnode := bsnodes[idx]
+		port, err := strconv.Atoi(bsnode.port)
+		_, err = minitox.t.Bootstrap(bsnode.host, uint16(port), bsnode.key)
 		if err != nil {
 		}
-		_, err = minitox.t.AddTcpRelay(bsnodes[0+idx*3], uint16(port), bsnodes[2+idx*3])
+		_, err = minitox.t.AddTcpRelay(bsnode.host, uint16(port), bsnode.key)
 		if err != nil {
 		}
 	}
@@ -1097,7 +1102,7 @@ func TestCovers(t *testing.T) {
 	// t.Log(v.fns)
 
 	notins := make(map[string]bool)
-	for mn, _ := range mths {
+	for mn := range mths {
 		if _, ok := v.fns[mn]; !ok {
 			t.Log("not tested:", mn)
 			notins[mn] = false
