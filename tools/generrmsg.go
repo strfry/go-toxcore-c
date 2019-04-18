@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/go-clang/v3.4/clang"
@@ -20,9 +21,23 @@ func main() {
 		copy(tuArgs, flag.Args()[1:])
 	}
 	_ = tuArgs
-	cmdArgs := []string{
-		"-std=c99",
-		"-I/usr/lib/clang/3.4/include"}
+
+	// auto find clang include dir
+	clincdir := "/usr/lib/clang/3.4/include"
+	clexe, err := exec.LookPath("clang")
+	if err != nil {
+		log.Println(err)
+	} else {
+		cmdo := exec.Command(clexe, "-print-resource-dir")
+		output, err := cmdo.CombinedOutput()
+		if err != nil {
+			log.Println(err)
+		} else {
+			clincdir = strings.TrimSpace(string(output))
+		}
+	}
+
+	cmdArgs := []string{"-std=c99", fmt.Sprintf("-I%s/include", clincdir)}
 	tu := idx.ParseTranslationUnit("/usr/local/include/tox/tox.h", cmdArgs, nil, 0)
 	defer tu.Dispose()
 
@@ -90,6 +105,6 @@ func main() {
 }
 
 /*
-结构：
+result structure:
 var _enumName_S map[int]string
 */
