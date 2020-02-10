@@ -70,19 +70,26 @@ import (
 type cb_msi_action_ftype func(av interface{}, this *MSICall)
 
 type MSICall struct {
+	call *C.MSICall
 	session *MSISession
 }
 
-func (this *MSICall) Hangup() (bool, error) {
-	//var cerr C.TOXAV_ERR_CALL
-	//r := C.toxav_call(this.toxav, C.uint32_t(friendNumber), C.uint32_t(audioBitRate), C.uint32_t(videoBitRate), &cerr)
-	//if cerr != 0 {
-//		return bool(r), toxerr(cerr)
-//	}
-//	return bool(r), nil
-
-return false, nil
+func (this *MSICall) Hangup() (error) {
+	var cerr = C.msi_hangup(this.call)
+	if cerr != 0 {
+		return toxerr(cerr)
+	}
+	return nil
 }
+
+func (this *MSICall) Answer(capabilities uint8) (error) {
+        var cerr = C.msi_answer(this.call, C.uchar(capabilities))
+        if cerr != 0 {
+                return toxerr(cerr)
+        }
+        return nil
+}
+
 
 type MSISession struct {
 	tox *Tox
@@ -107,6 +114,7 @@ func callbackMSIActionWrapperForC(av unsafe.Pointer, call *C.struct_MSICall_s) {
         var this = cbMSISessions.get(csession)
 
 	var msicall = MSICall{}
+	msicall.call = call
         msicall.session = this
 
 	if this.cb_msi_action != nil {
