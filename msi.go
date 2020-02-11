@@ -75,11 +75,7 @@ int msi_hangup(MSICall *call);
 int msi_answer(MSICall *call, uint8_t capabilities);
 int msi_change_capabilities(MSICall *call, uint8_t capabilities);
 
-void callbackMSIActionWrapperForC(void *av, MSICall* call);
-
-//int msi_call_get_friend_numer(MSICall* call) {
-//    return call->friend_number;
-//}
+int callbackMSIActionWrapperForC(void *av, MSICall* call);
 
 */
 import "C"
@@ -95,6 +91,17 @@ type MSICall struct {
 	call *C.MSICall
 	session *MSISession
 }
+
+type MSICallbackID int
+
+const (
+	MSI_ON_INVITE MSICallbackID = iota // Incoming call
+	MSI_ON_START // Call (RTP transmission) started
+	MSI_ON_END // Call that was active ended
+	MSI_ON_ERROR // On protocol error
+	MSI_ON_PEERTIMEOUT // Peer timed out; stop the call
+	MSI_ON_CAPABILITIES // Peer requested capabilities change
+)
 
 func (this *MSICall) Hangup() (error) {
 	var cerr = C.msi_hangup(this.call)
@@ -128,7 +135,7 @@ type MSISession struct {
 var cbMSISessions = newUserDataMSISession()
 
 //export callbackMSIActionWrapperForC
-func callbackMSIActionWrapperForC(av unsafe.Pointer, call *C.struct_MSICall_s) {
+func callbackMSIActionWrapperForC(av unsafe.Pointer, call *C.struct_MSICall_s) (int32) {
 	// same hack
         var callptr0 = *(*uintptr)(unsafe.Pointer(call))
         var csession = (*C.MSISession)(unsafe.Pointer(callptr0))
@@ -142,13 +149,15 @@ func callbackMSIActionWrapperForC(av unsafe.Pointer, call *C.struct_MSICall_s) {
 	if this.cb_msi_action != nil {
 		this.cb_msi_action(av, &msicall)
 	}
+
+	return 0
 }
 
-func (this *MSISession) RegisterCallback (id C.MSICallbackID, cbfn cb_msi_action_ftype) (error) {
+func (this *MSISession) RegisterCallback (id MSICallbackID, cbfn cb_msi_action_ftype) (error) {
 	this.cb_msi_action = cbfn
 
 	var _cbfn = (*C.msi_action_cb)(C.callbackMSIActionWrapperForC)
-	C.msi_register_callback(this.msi, _cbfn, id)
+	C.msi_register_callback(this.msi, _cbfn, (C.MSICallbackID)(id))
 	return nil
 }
 
