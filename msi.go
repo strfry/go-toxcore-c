@@ -44,9 +44,27 @@ typedef enum MSICallbackID {
 // **
 // * The call struct. Please do not modify outside msi.c
 // * /
-typedef struct MSICall_s MSICall;
 typedef struct MSISession_s MSISession;
 typedef struct Messenger Messenger;
+
+struct MSICall_s {
+    //struct MSISession_s *session;        
+
+    //MSICallState         state;
+    uint8_t              peer_capabilities;
+    uint8_t              self_capabilities;
+    uint16_t             peer_vfpsz;       
+    uint32_t             friend_number;    
+    MSIError             error;            
+
+    struct ToxAVCall_s  *av_call;          
+
+    struct MSICall_s    *next;
+    struct MSICall_s    *prev;
+};
+typedef struct MSICall_s MSICall;
+
+
 
 typedef int msi_action_cb(void *av, MSICall *call);
 
@@ -58,6 +76,10 @@ int msi_answer(MSICall *call, uint8_t capabilities);
 int msi_change_capabilities(MSICall *call, uint8_t capabilities);
 
 void callbackMSIActionWrapperForC(void *av, MSICall* call);
+
+//int msi_call_get_friend_numer(MSICall* call) {
+//    return call->friend_number;
+//}
 
 */
 import "C"
@@ -149,6 +171,11 @@ func NewMSISession(tox *Tox) (*MSISession, error) {
 	return msi, nil
 }
 
-func UseUnsafePointer() (unsafe.Pointer) {
-	return unsafe.Pointer(nil)
+func (this *MSICall) FriendNumber () (uint32) {
+	return (uint32)(this.call.friend_number)
 }
+
+func (this *MSICall) Tox () (*Tox) {
+	return this.session.tox
+}
+
